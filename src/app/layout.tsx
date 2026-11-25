@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full bg-surface">
         <Providers>
           {/* App shell: full-width on phones, phone-width column on bigger screens */}
-          <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-white shadow-[0_0_40px_rgba(3,25,61,0.06)]">
+          <div className="mx-auto flex min-h-dvh w-full flex-col bg-white md:max-w-[430px] md:shadow-[0_0_40px_rgba(3,25,61,0.06)]">
             {children}
           </div>
         </Providers>
