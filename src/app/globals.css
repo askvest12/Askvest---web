@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/*
+  AskVest design tokens, taken from the Figma file (askvest 001).
+  Frames are 390 x 844, so layouts are built mobile-first at 390px.
+*/
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy: #03193d;
+  --color-navy-700: #102a43;
+  --color-navy-600: #0d315e;
+  --color-mint: #5de9d1;
+  --color-mint-600: #64d8cb;
+  --color-mint-100: #b4f0e9;
+  --color-mint-50: #e8f7fa;
+  --color-ink: #102a43;
+  --color-ink-muted: #56708a; /* Figma #627D98, darkened for WCAG AA contrast */
+  --color-ink-subtle: #64788d; /* Figma #829AB1, darkened for WCAG AA contrast */
+  --color-line: #d9e2ec;
+  --color-surface: #f0f4f8;
+  --color-surface-mint: #eaf3f5;
+  --color-danger: #c53030;
+  --color-danger-50: #fdecec;
+  --color-success: #17805f;
+
+  --radius-field: 14px;
+  --radius-card: 16px;
+  --radius-sheet: 22px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-white font-sans text-ink antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-mint-600);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes loader-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
