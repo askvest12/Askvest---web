@@ -74,7 +74,7 @@ export function IntroCarousel() {
             aria-label={`${i + 1} of ${slides.length}`}
             aria-hidden={i !== active}
           >
-            <div className="relative flex-1">
+            <div className="relative flex flex-1 flex-col justify-center">
               <Art />
             </div>
             <div className="relative px-5 pb-6">

@@ -15,7 +15,7 @@ function MintGlow() {
 /** Slide 1: AI chat preview. Content is illustrative, as labelled in the design. */
 export function AskAiArt() {
   return (
-    <div className="relative h-full min-h-[400px] px-5 pt-14">
+    <div className="relative min-h-[400px] px-5 pt-14">
       <MintGlow />
       <div className="relative ml-auto w-fit max-w-[225px] rounded-2xl bg-navy px-4 py-2.5 text-[13.5px] font-medium text-white">
         Explain Apple stock to me like I&apos;m new
@@ -67,7 +67,7 @@ export function AskAiArt() {
 /** Slide 2: virtual account card. Sample details are placeholders from the design. */
 export function VirtualAccountArt() {
   return (
-    <div className="relative flex h-full min-h-[400px] flex-col items-center justify-center px-5 pt-10">
+    <div className="relative flex min-h-[400px] flex-col items-center justify-center px-5 pt-10">
       <MintGlow />
       <div className="relative w-full max-w-[300px] overflow-hidden rounded-[20px] bg-navy p-5 text-white shadow-[0_20px_40px_rgba(3,25,61,0.25)]">
         <LogoMark className="pointer-events-none absolute -right-8 -bottom-10 w-[170px] opacity-10" />
@@ -98,7 +98,7 @@ export function VirtualAccountArt() {
 /** Slide 3: gifting preview over a photo. */
 export function GiftArt() {
   return (
-    <div className="relative h-full min-h-[400px]">
+    <div className="relative h-full min-h-[400px] flex-1">
       <Image
         src="/onboarding/friends.webp"
         alt="Four friends smiling at a phone together"
@@ -115,7 +115,7 @@ export function GiftArt() {
             <GiftIcon />
           </span>
           <div>
-            <p className="text-[10px] font-bold tracking-[0.08em] text-mint-600">GIFT A SHARE</p>
+            <p className="text-[10px] font-bold tracking-[0.08em] text-success">GIFT A SHARE</p>
             <p className="text-[13.5px] font-bold text-navy">Apple · 1 share</p>
           </div>
         </div>

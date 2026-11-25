@@ -13,6 +13,7 @@ import { AppleIcon, CheckIcon, GoogleIcon, LockIcon, MailIcon, UserIcon } from "
 import { passwordRules, signUpSchema, type SignUpInput } from "@/lib/validation/auth";
 import { apiPost, ApiError } from "@/lib/api/client";
 import { setPendingEmail } from "@/lib/pending-email";
+import { randomId } from "@/lib/random-id";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export function SignUpForm() {
   });
 
   const onSubmit = handleSubmit((values) => {
-    idemKey.current ||= crypto.randomUUID();
+    idemKey.current ||= randomId();
     signUp.mutate(values);
   });
 

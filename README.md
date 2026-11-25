@@ -34,9 +34,11 @@ npm run dev                  # http://localhost:3000
 
 Open it at phone width (390px) in dev tools, or on your phone over the local network.
 
-Mock test emails on sign up:
-- `taken@askvest.test` shows "email already exists"
-- `down@askvest.test` shows "couldn't reach AskVest"
+Mock test values (until the backend is live):
+- Sign up: `taken@askvest.test` shows "email already exists", `down@askvest.test` shows "couldn't reach AskVest"
+- Verify email: `123456` is correct, `000000` is expired, anything else is incorrect
+- Log in: any email with password `Password1`
+- Forgot password: always shows "Check your inbox"
 
 ## Screens
 
@@ -45,9 +47,9 @@ Mock test emails on sign up:
 | 01 Splash | `/` | Done |
 | 02 Welcome + Onboarding 2, 3 | `/welcome` | Done (swipeable carousel) |
 | 03 / 03b Sign up | `/sign-up` | Done (mock API). Google/Apple show "coming soon" |
-| 04 to 04d Email verification | `/verify-email` | Next |
-| 05 to 05c Login | `/login` | Next (biometrics hidden) |
-| 06, 06b Forgot password | | To do |
+| 04 to 04d Email verification | `/verify-email` | Done (mock API) |
+| 05 to 05c Login | `/login` | Done (mock API, biometrics hidden) |
+| 06, 06b Forgot password | `/forgot-password` | Done (mock API) |
 | 07 to 10b Personalisation | | To do (waiting on backend endpoints) |
 
 ## Open items with backend and design
