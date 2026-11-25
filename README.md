@@ -34,11 +34,13 @@ npm run dev                  # http://localhost:3000
 
 Open it at phone width (390px) in dev tools, or on your phone over the local network.
 
-Mock test values (until the backend is live):
-- Sign up: `taken@askvest.test` shows "email already exists", `down@askvest.test` shows "couldn't reach AskVest"
-- Verify email: `123456` is correct, `000000` is expired, anything else is incorrect
-- Log in: any email with password `Password1`
+Mock test values (used while `BACKEND_API_URL` is empty):
+- Sign up: any details. `down@askvest.test` shows "couldn't reach AskVest"
+- Verify email: `123456` is correct, anything else is incorrect
+- Log in: password `Password1`. `unverified@askvest.test` goes to verify email, `newdevice@askvest.test` shows the new-device message
 - Forgot password: always shows "Check your inbox"
+
+Point at the real API by setting `BACKEND_API_URL` (e.g. the Render URL) in `.env.local`. The API docs are at `<BACKEND_API_URL>/scalar`.
 
 ## Screens
 
@@ -52,10 +54,20 @@ Mock test values (until the backend is live):
 | 06, 06b Forgot password | `/forgot-password` | Done (mock API) |
 | 07 to 10b Personalisation | | To do (waiting on backend endpoints) |
 
+## Backend contract (askvest12/AskVest)
+
+Route handlers in `src/app/api/auth/*` call `/api/v1/auth/*` and unwrap the `{ success, message, data, error }` envelope.
+- `Idempotency-Key` is sent on sign-up, verify-email, resend-verification, forgot-password and logout
+- Login sends device info (`installationId` from the `av_iid` cookie, platform `web`)
+- Tokens live in httpOnly cookies: `av_at` (access), `av_rt` (refresh, path `/api/auth`)
+- Backend errors are mapped to UI copy in `src/lib/api/errors.ts`
+
 ## Open items with backend and design
 
-- Real endpoint paths and the response envelope shape (OpenAPI on Render)
-- Password policy must match the backend
+- Password policy: backend wants 10+ chars with a letter and a number (Figma says 8+, upper & lowercase)
+- Forgot password is code based on the backend (`/auth/reset-password`), Figma shows a link
+- New-device login needs a code screen (`/auth/verify-device`), not in Figma
+- Rate limiting is per client IP: behind our Next.js server, the backend must trust our `X-Forwarded-For`
 - Google/Apple sign in is not on the backend yet
 - Personalisation answers need an endpoint
 - Reset-password screen and step counter are being fixed in Figma

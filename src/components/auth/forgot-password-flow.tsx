@@ -12,6 +12,7 @@ import { IconTile, InfoNote } from "@/components/ui/feedback";
 import { LockIcon, MailIcon } from "@/components/ui/icons";
 import { emailOnlySchema, type EmailOnlyInput } from "@/lib/validation/auth";
 import { apiPost, ApiError } from "@/lib/api/client";
+import { randomId } from "@/lib/random-id";
 
 // 06 · Forgot Password and 06b · Check your inbox
 export function ForgotPasswordFlow() {
@@ -24,7 +25,7 @@ export function ForgotPasswordFlow() {
   } = useForm<EmailOnlyInput>({ resolver: zodResolver(emailOnlySchema), defaultValues: { email: "" } });
 
   const send = useMutation({
-    mutationFn: (v: EmailOnlyInput) => apiPost<{ sent: true }>("/api/auth/forgot-password", v),
+    mutationFn: (v: EmailOnlyInput) => apiPost<{ sent: true }>("/api/auth/forgot-password", v, randomId()),
     onSuccess: (_d, v) => setSentTo(v.email),
     onError: (err) => setError("root", { message: err instanceof ApiError ? err.message : "Something went wrong. Please try again." }),
   });

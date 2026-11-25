@@ -1,33 +1,43 @@
 import { loginSchema } from "@/lib/validation/auth";
-import { backendFetch, useMocks } from "@/lib/api/server";
+import { backendFetch, clientIpFrom, useMocks } from "@/lib/api/server";
 import { mockLogin } from "@/lib/api/mocks";
+import type { AuthenticatedPayloadLike } from "@/lib/api/mock-types";
+import { toUiError } from "@/lib/api/errors";
 import { errorResponse, guardJson } from "@/lib/api/route-guard";
-import { setSession } from "@/lib/api/session";
+import { deviceNameFrom, getInstallationId, setDeviceChallenge, setSession } from "@/lib/api/session";
 
-// TODO(backend): real path and token response shape.
-const PATH = "/api/v1/identity/login";
-
+// POST /api/v1/auth/login { email, password, device }. No idempotency key (backend exempts login).
 export async function POST(request: Request) {
   const input = await guardJson(request, loginSchema);
   if (!input.ok) return input.response;
   const { email, password } = input.data;
 
+  const device = {
+    installationId: await getInstallationId(),
+    platform: "web",
+    deviceName: deviceNameFrom(request.headers.get("user-agent")),
+    appVersion: process.env.NEXT_PUBLIC_APP_VERSION ?? "0.1.0",
+  };
+
   const result = useMocks
-    ? await mockLogin(password)
-    : await backendFetch<{ accessToken: string; refreshToken: string }>(PATH, {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
+    ? await mockLogin(email, password)
+    : await backendFetch<AuthenticatedPayloadLike>("/auth/login", {
+        body: { email, password, device },
+        clientIp: clientIpFrom(request),
       });
 
   if (!result.ok) {
-    // Same message for wrong email and wrong password, so attackers can't probe which emails exist.
-    if (result.status === 400 || result.status === 401 || result.status === 404) {
-      return errorResponse({ code: "invalid_credentials", message: "Incorrect email or password." }, 401);
-    }
-    return errorResponse(result.error, result.status);
+    const { body, status } = toUiError(result.error, result.status);
+    return errorResponse(body, status);
+  }
+
+  if (result.data.result === "device_verification_required") {
+    // The backend emailed a code to confirm this new device.
+    await setDeviceChallenge(result.data.challengeId);
+    return Response.json({ data: { result: "device_verification_required" } });
   }
 
   await setSession(result.data);
   // Tokens stay in httpOnly cookies; nothing sensitive goes back in the body.
-  return Response.json({ data: { ok: true } });
+  return Response.json({ data: { result: "authenticated" } });
 }

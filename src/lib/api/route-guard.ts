@@ -1,10 +1,11 @@
 import "server-only";
 import type { z } from "zod";
+import type { ApiErrorBody } from "./server";
+import { randomUUID } from "node:crypto";
 
 type Guarded<T> = { ok: true; data: T } | { ok: false; response: Response };
 
-const json = (status: number, code: string, message: string) =>
-  Response.json({ error: { code, message } }, { status });
+const json = (status: number, code: string, message: string) => Response.json({ error: { code, message } }, { status });
 
 /**
  * Shared checks for our /api route handlers:
@@ -27,6 +28,11 @@ export async function guardJson<S extends z.ZodType>(request: Request, schema: S
   return { ok: true, data: parsed.data };
 }
 
+/** Same-origin check for bodiless POSTs (logout, refresh). */
+export function guardSameOrigin(request: Request): Response | null {
+  return isSameOrigin(request) ? null : json(403, "forbidden", "Invalid origin.");
+}
+
 /**
  * Compares the browser's Origin with the host the browser actually used.
  * (request.url can't be used: behind dev servers and proxies it holds the
@@ -34,7 +40,7 @@ export async function guardJson<S extends z.ZodType>(request: Request, schema: S
  */
 function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
-  if (!origin) return true; // same-origin GETs and some older browsers omit it; JSON + SameSite cookies still apply
+  if (!origin) return true; // some browsers omit it on same-origin requests; JSON + SameSite cookies still apply
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   try {
     return !!host && new URL(origin).host === host;
@@ -43,6 +49,17 @@ function isSameOrigin(request: Request): boolean {
   }
 }
 
-export function errorResponse(error: { code: string; message: string }, status: number) {
-  return Response.json({ error }, { status });
+/**
+ * Idempotency-Key to send to the backend: the browser's key when it is valid
+ * (so a retried tap is recognised as the same request), otherwise a fresh one.
+ * Backend rule: 8 to 128 chars of [A-Za-z0-9_.:-].
+ */
+export function idempotencyKeyFrom(request: Request): string {
+  const k = request.headers.get("idempotency-key");
+  return k && /^[A-Za-z0-9_.:-]{8,128}$/.test(k) ? k : randomUUID();
+}
+
+export function errorResponse(error: ApiErrorBody, status: number) {
+  const headers = error.retryAfter ? { "Retry-After": String(Math.ceil(error.retryAfter)) } : undefined;
+  return Response.json({ error }, { status, headers });
 }

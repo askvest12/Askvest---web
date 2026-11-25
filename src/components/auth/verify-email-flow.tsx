@@ -10,6 +10,7 @@ import { AlertIcon, ClockIcon, IconTile, InfoNote } from "@/components/ui/feedba
 import { CheckIcon, MailIcon } from "@/components/ui/icons";
 import { apiPost, ApiError } from "@/lib/api/client";
 import { usePendingEmail } from "@/lib/pending-email";
+import { randomId } from "@/lib/random-id";
 import { OTP_LENGTH } from "@/lib/validation/auth";
 import { useCountdown } from "@/lib/use-countdown";
 
@@ -25,7 +26,7 @@ export function VerifyEmailFlow() {
   const autoSubmitted = useRef("");
 
   const verify = useMutation({
-    mutationFn: (c: string) => apiPost<{ verified: true }>("/api/auth/verify-email", { email, code: c }),
+    mutationFn: (c: string) => apiPost<{ verified: true }>("/api/auth/verify-email", { email, code: c }, randomId()),
     onSuccess: () => setStatus("verified"),
     onError: (err) => {
       if (err instanceof ApiError && err.code === "code_expired") return setStatus("expired");
@@ -35,7 +36,7 @@ export function VerifyEmailFlow() {
   });
 
   const resend = useMutation({
-    mutationFn: () => apiPost<{ sent: true }>("/api/auth/resend-code", { email }),
+    mutationFn: () => apiPost<{ sent: true }>("/api/auth/resend-code", { email }, randomId()),
     onSuccess: () => {
       setCode("");
       autoSubmitted.current = "";

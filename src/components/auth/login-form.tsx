@@ -11,6 +11,7 @@ import { ErrorBanner } from "@/components/ui/feedback";
 import { LockIcon, MailIcon } from "@/components/ui/icons";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 import { apiPost, ApiError } from "@/lib/api/client";
+import { setPendingEmail } from "@/lib/pending-email";
 
 // 05 · Login, 05b error, 05c loading. "Use biometrics" is hidden until the backend supports passkeys.
 export function LoginForm() {
@@ -20,6 +21,7 @@ export function LoginForm() {
     handleSubmit,
     setError,
     clearErrors,
+    getValues,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -28,11 +30,24 @@ export function LoginForm() {
   });
 
   const login = useMutation({
-    mutationFn: (values: LoginInput) => apiPost<{ ok: true }>("/api/auth/login", values),
-    onSuccess: () => router.replace("/home"),
+    mutationFn: (values: LoginInput) =>
+      apiPost<{ result: "authenticated" | "device_verification_required" }>("/api/auth/login", values),
+    onSuccess: (data, values) => {
+      if (data.result === "device_verification_required") {
+        // TODO: device code screen (not in Figma yet). Backend has emailed a code.
+        setError("root.server", { message: `New device: we've sent a code to ${values.email} to confirm it's you.` });
+        return;
+      }
+      router.replace("/home");
+    },
     onError: (err) => {
       if (err instanceof ApiError && err.code === "invalid_credentials") {
         setError("root.credentials", { message: "Incorrect email or password." });
+        return;
+      }
+      if (err instanceof ApiError && err.code === "email_not_verified") {
+        setPendingEmail(getValues("email"));
+        router.push("/verify-email");
         return;
       }
       setError("root.server", { message: err instanceof ApiError ? err.message : "Something went wrong. Please try again." });

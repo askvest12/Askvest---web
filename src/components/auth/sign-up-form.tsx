@@ -44,8 +44,12 @@ export function SignUpForm() {
     onError: (err) => {
       // A failed attempt may be retried with different details, so it needs a fresh key.
       idemKey.current = "";
-      if (err instanceof ApiError && err.code === "email_taken") {
-        setError("email", { message: err.message });
+      if (err instanceof ApiError && err.code === "validation" && err.fields?.length) {
+        // Backend rules (e.g. password length, breached passwords) come back per field.
+        for (const f of err.fields) {
+          const name = f.field.toLowerCase();
+          if (name === "password" || name === "email") setError(name, { message: f.message });
+        }
         return;
       }
       setError("root", { message: err instanceof ApiError ? err.message : "Something went wrong. Please try again." });
