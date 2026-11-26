@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
-import { ComingNext } from "@/components/ui/coming-next";
+import { Suspense } from "react";
+import { LoginForm } from "@/components/auth/login-form";
+import { BackButton } from "@/components/ui/back-button";
 
 export const metadata: Metadata = { title: "Log in" };
 
-// TODO: 05 · Login (+ 05b error, 05c loading). Biometrics button hidden per backend.
+// 05 · Login (+ 05b error, 05c loading)
 export default function LoginPage() {
-  return <ComingNext title="Welcome back" note="The login screen is the next one being built." />;
+  return (
+    <main className="flex min-h-dvh flex-1 flex-col px-5 pt-4 pb-[max(20px,env(safe-area-inset-bottom))]">
+      <BackButton fallbackHref="/welcome" />
+      <h1 className="mt-5 text-[30px] leading-tight font-extrabold tracking-tight text-navy">Welcome back</h1>
+      <p className="mt-1.5 text-[15px] font-medium text-ink-muted">Log in to pick up where you left off.</p>
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </main>
+  );
 }

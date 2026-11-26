@@ -1,40 +1,27 @@
 import { signUpSchema } from "@/lib/validation/auth";
-import { backendFetch, useMocks } from "@/lib/api/server";
+import { backendFetch, clientIpFrom, useMocks } from "@/lib/api/server";
 import { mockSignUp } from "@/lib/api/mocks";
+import { toUiError } from "@/lib/api/errors";
+import { errorResponse, guardJson, idempotencyKeyFrom } from "@/lib/api/route-guard";
 
-// TODO(backend): replace with the real path from the OpenAPI spec.
-const SIGN_UP_PATH = "/api/v1/identity/sign-up";
-
+// POST /api/v1/auth/sign-up { email, password, fullName }
+// The backend answers the same way whether or not the email already exists.
 export async function POST(request: Request) {
-  // Only accept same-origin JSON posts from our own pages.
-  if (!request.headers.get("content-type")?.includes("application/json")) {
-    return Response.json({ error: { code: "bad_request", message: "Invalid request." } }, { status: 415 });
-  }
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
-    return Response.json({ error: { code: "forbidden", message: "Invalid origin." } }, { status: 403 });
-  }
-
-  const json: unknown = await request.json().catch(() => null);
-  const parsed = signUpSchema.safeParse(json);
-  if (!parsed.success) {
-    return Response.json(
-      { error: { code: "validation", message: "Please check your details and try again." } },
-      { status: 400 },
-    );
-  }
-  const { fullName, email, password } = parsed.data;
+  const input = await guardJson(request, signUpSchema);
+  if (!input.ok) return input.response;
+  const { email, password, fullName } = input.data;
 
   const result = useMocks
     ? await mockSignUp(email)
-    : await backendFetch<{ email: string }>(SIGN_UP_PATH, {
-        method: "POST",
-        body: JSON.stringify({ fullName, email, password }),
-        idempotencyKey: request.headers.get("idempotency-key") ?? crypto.randomUUID(),
+    : await backendFetch<null>("/auth/sign-up", {
+        body: { email, password, fullName },
+        idempotencyKey: idempotencyKeyFrom(request),
+        clientIp: clientIpFrom(request),
       });
 
   if (!result.ok) {
-    return Response.json({ error: result.error }, { status: result.status });
+    const { body, status } = toUiError(result.error, result.status);
+    return errorResponse(body, status);
   }
   // Never echo the password or backend internals back to the browser.
   return Response.json({ data: { email } }, { status: 201 });

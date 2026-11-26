@@ -6,6 +6,7 @@ import { forwardRef, useId, useState, type ComponentProps, type ReactNode } from
 type TextFieldProps = ComponentProps<"input"> & {
   label: string;
   icon?: ReactNode;
+  /** Message shown under the field. Pass " " to show the error style without a message. */
   error?: string;
   /** Adds a show/hide toggle. Use for passwords. */
   revealable?: boolean;
@@ -28,8 +29,10 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
       </label>
       <div
         className={clsx(
-          "flex h-[52px] items-center gap-3 rounded-[var(--radius-field)] border bg-white px-4 transition focus-within:border-navy",
-          error ? "border-danger" : "border-line",
+          "flex h-[52px] items-center gap-3 rounded-[var(--radius-field)] border px-4 transition",
+          error
+            ? "border-danger bg-danger-50/40 [&>span:first-child]:text-danger"
+            : "border-line bg-white focus-within:border-mint-600 focus-within:ring-4 focus-within:ring-mint/20",
         )}
       >
         {icon && <span className="shrink-0 text-ink-subtle">{icon}</span>}
@@ -38,7 +41,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
           id={inputId}
           type={inputType}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
+          aria-describedby={error?.trim() ? errorId : undefined}
           className="h-full min-w-0 flex-1 bg-transparent text-[15px] font-medium text-ink outline-none placeholder:font-normal placeholder:text-ink-subtle"
           {...rest}
         />
@@ -54,7 +57,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
           </button>
         )}
       </div>
-      {error && (
+      {error?.trim() && (
         <p id={errorId} role="alert" className="text-[12.5px] font-medium text-danger">
           {error}
         </p>

@@ -13,6 +13,7 @@ import { AppleIcon, CheckIcon, GoogleIcon, LockIcon, MailIcon, UserIcon } from "
 import { passwordRules, signUpSchema, type SignUpInput } from "@/lib/validation/auth";
 import { apiPost, ApiError } from "@/lib/api/client";
 import { setPendingEmail } from "@/lib/pending-email";
+import { randomId } from "@/lib/random-id";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -43,8 +44,12 @@ export function SignUpForm() {
     onError: (err) => {
       // A failed attempt may be retried with different details, so it needs a fresh key.
       idemKey.current = "";
-      if (err instanceof ApiError && err.code === "email_taken") {
-        setError("email", { message: err.message });
+      if (err instanceof ApiError && err.code === "validation" && err.fields?.length) {
+        // Backend rules (e.g. password length, breached passwords) come back per field.
+        for (const f of err.fields) {
+          const name = f.field.toLowerCase();
+          if (name === "password" || name === "email") setError(name, { message: f.message });
+        }
         return;
       }
       setError("root", { message: err instanceof ApiError ? err.message : "Something went wrong. Please try again." });
@@ -52,7 +57,7 @@ export function SignUpForm() {
   });
 
   const onSubmit = handleSubmit((values) => {
-    idemKey.current ||= crypto.randomUUID();
+    idemKey.current ||= randomId();
     signUp.mutate(values);
   });
 
@@ -86,7 +91,7 @@ export function SignUpForm() {
             autoComplete="new-password"
             revealable
             icon={<LockIcon />}
-            error={errors.password && password.length === 0 ? "Create a password" : undefined}
+            error={errors.password ? (password.length === 0 ? "Create a password" : passwordRules.every((r) => r.test(password)) ? errors.password.message : undefined) : undefined}
             {...register("password")}
           />
           {password.length > 0 && (

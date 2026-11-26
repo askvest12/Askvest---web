@@ -26,10 +26,15 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
 
+// Extra hosts allowed to load the dev server (e.g. your phone on the LAN).
+// Set in .env.local: ALLOWED_DEV_ORIGINS=192.168.1.123
+const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  allowedDevOrigins,
   turbopack: {
     rules: {
       "*.css": {
