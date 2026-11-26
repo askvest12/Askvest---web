@@ -37,7 +37,7 @@ Open it at phone width (390px) in dev tools, or on your phone over the local net
 Mock test values (used while `BACKEND_API_URL` is empty):
 - Sign up: any details. `down@askvest.test` shows "couldn't reach AskVest"
 - Verify email: `123456` is correct, anything else is incorrect
-- Log in: password `Password1`. `unverified@askvest.test` goes to verify email, `newdevice@askvest.test` shows the new-device message
+- Log in: password `Askvest2026x`. `unverified@askvest.test` goes to verify email, `newdevice@askvest.test` shows the new-device message
 - Forgot password: always shows "Check your inbox"
 - Personalisation: needs a logged-in session (log in first), then any answers
 
@@ -65,7 +65,7 @@ Route handlers in `src/app/api/auth/*` call `/api/v1/auth/*` and unwrap the `{ s
 
 ## Open items with backend and design
 
-- Password policy: backend wants 10+ chars with a letter and a number (Figma says 8+, upper & lowercase)
+- Password checklist follows the backend (10+ chars, a letter, a number). Figma still says 8+, upper & lowercase
 - Forgot password is code based on the backend (`/auth/reset-password`), Figma shows a link
 - New-device login needs a code screen (`/auth/verify-device`), not in Figma
 - Rate limiting is per client IP: behind our Next.js server, the backend must trust our `X-Forwarded-For`

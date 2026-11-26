@@ -6,7 +6,7 @@ import type { ApiResult, AuthenticatedPayloadLike } from "./mock-types";
 //
 // Sign up:   down@askvest.test -> backend unavailable. (The real API never says "email taken".)
 // Verify:    123456 -> success, anything else -> auth.invalid_code
-// Log in:    password "Password1" -> success
+// Log in:    password "Askvest2026x" -> success
 //            unverified@askvest.test -> auth.email_not_verified
 //            newdevice@askvest.test  -> device verification required (screen not designed yet)
 //            anything else -> auth.invalid_credentials
@@ -15,7 +15,7 @@ import type { ApiResult, AuthenticatedPayloadLike } from "./mock-types";
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const fail = (status: number, code: string, message: string) => ({ ok: false as const, status, error: { code, message } });
 
-export const MOCK_PASSWORD = "Password1";
+export const MOCK_PASSWORD = "Askvest2026x";
 
 export async function mockSignUp(email: string): Promise<ApiResult<null>> {
   await wait(700);

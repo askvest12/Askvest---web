@@ -91,7 +91,7 @@ export function SignUpForm() {
             autoComplete="new-password"
             revealable
             icon={<LockIcon />}
-            error={errors.password && password.length === 0 ? "Create a password" : undefined}
+            error={errors.password ? (password.length === 0 ? "Create a password" : passwordRules.every((r) => r.test(password)) ? errors.password.message : undefined) : undefined}
             {...register("password")}
           />
           {password.length > 0 && (
