@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { BackButton } from "@/components/ui/back-button";
 
@@ -11,7 +12,9 @@ export default function LoginPage() {
       <BackButton fallbackHref="/welcome" />
       <h1 className="mt-5 text-[30px] leading-tight font-extrabold tracking-tight text-navy">Welcome back</h1>
       <p className="mt-1.5 text-[15px] font-medium text-ink-muted">Log in to pick up where you left off.</p>
-      <LoginForm />
+      <Suspense>
+        <LoginForm />
+      </Suspense>
     </main>
   );
 }

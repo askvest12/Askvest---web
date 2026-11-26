@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { ComingNext } from "@/components/ui/coming-next";
+import { PersonaliseFlow } from "@/components/onboarding/personalise-flow";
 
 export const metadata: Metadata = { title: "Personalise" };
 
-// TODO: 07 to 10b personalisation (waiting on backend endpoints)
+// 07 Intro, 08 Experience, 09 Goals, 10 Country (10b empty search). Needs a logged-in user.
 export default function PersonalisePage() {
-  return <ComingNext title="Let's make investing make sense for you." note="The personalisation questions are being built next." />;
+  return <PersonaliseFlow />;
 }

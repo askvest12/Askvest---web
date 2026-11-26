@@ -15,7 +15,7 @@ export const signUpSchema = z.object({
     .string()
     .trim()
     .min(2, "Please enter your full name")
-    .max(100, "That name is too long")
+    .max(120, "That name is too long")
     .refine((v) => v.split(/\s+/).length >= 2, "Please enter your full name"),
   email,
   password: z
@@ -43,3 +43,24 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password").max(128),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+// Onboarding (ADR 0023 in askvest12/AskVest): PUT /api/v1/account/onboarding + PUT /api/v1/compliance/country
+export const familiarityValues = ["newcomer", "some", "experienced"] as const;
+export const goalValues = [
+  "learn_investing",
+  "build_wealth",
+  "discover_opportunities",
+  "research_companies",
+  "diversify",
+  "practice_first",
+] as const;
+
+export const onboardingSchema = z
+  .object({
+    familiarity: z.enum(familiarityValues).optional(),
+    goals: z.array(z.enum(goalValues)).max(goalValues.length).optional(),
+    preferredCurrency: z.string().regex(/^[A-Z]{3}$/).optional(),
+    country: z.string().regex(/^[A-Z]{2}$/).optional(),
+  })
+  .refine((v) => Object.values(v).some((x) => x !== undefined), "Nothing to save");
+export type OnboardingInput = z.infer<typeof onboardingSchema>;

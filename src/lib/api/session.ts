@@ -33,19 +33,19 @@ const secondsUntil = (iso: string | undefined, fallback: number) => {
 export async function setSession(s: Pick<AuthenticatedPayload, "accessToken" | "refreshToken"> & Partial<AuthenticatedPayload>) {
   const jar = await cookies();
   jar.set(ACCESS_COOKIE, s.accessToken, { ...base, maxAge: secondsUntil(s.accessTokenExpiresAt, 60 * 15) });
-  // Refresh token is only ever sent to our auth routes.
+  // Refresh token is only sent to our /api routes, never on page loads.
   jar.set(REFRESH_COOKIE, s.refreshToken, {
     ...base,
-    path: "/api/auth",
+    path: "/api",
     maxAge: secondsUntil(s.refreshIdleExpiresAt, 60 * 60 * 24 * 30),
   });
-  jar.delete(CHALLENGE_COOKIE);
+  jar.delete({ name: CHALLENGE_COOKIE, path: "/api" });
 }
 
 export async function clearSession() {
   const jar = await cookies();
   jar.delete(ACCESS_COOKIE);
-  jar.delete({ name: REFRESH_COOKIE, path: "/api/auth" });
+  jar.delete({ name: REFRESH_COOKIE, path: "/api" });
 }
 
 export async function getAccessToken() {
@@ -72,7 +72,7 @@ export async function getInstallationId() {
 
 /** Holds the device-verification challenge between login and the code screen. */
 export async function setDeviceChallenge(challengeId: string) {
-  (await cookies()).set(CHALLENGE_COOKIE, challengeId, { ...base, path: "/api/auth", maxAge: 60 * 15 });
+  (await cookies()).set(CHALLENGE_COOKIE, challengeId, { ...base, path: "/api", maxAge: 60 * 15 });
 }
 
 export async function getDeviceChallenge() {

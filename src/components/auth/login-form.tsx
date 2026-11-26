@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -12,10 +12,12 @@ import { LockIcon, MailIcon } from "@/components/ui/icons";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 import { apiPost, ApiError } from "@/lib/api/client";
 import { setPendingEmail } from "@/lib/pending-email";
+import { safeNext } from "@/lib/safe-next";
 
 // 05 · Login, 05b error, 05c loading. "Use biometrics" is hidden until the backend supports passkeys.
 export function LoginForm() {
   const router = useRouter();
+  const next = safeNext(useSearchParams().get("next"));
   const {
     register,
     handleSubmit,
@@ -38,7 +40,7 @@ export function LoginForm() {
         setError("root.server", { message: `New device: we've sent a code to ${values.email} to confirm it's you.` });
         return;
       }
-      router.replace("/home");
+      router.replace(next);
     },
     onError: (err) => {
       if (err instanceof ApiError && err.code === "invalid_credentials") {

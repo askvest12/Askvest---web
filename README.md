@@ -39,6 +39,7 @@ Mock test values (used while `BACKEND_API_URL` is empty):
 - Verify email: `123456` is correct, anything else is incorrect
 - Log in: password `Password1`. `unverified@askvest.test` goes to verify email, `newdevice@askvest.test` shows the new-device message
 - Forgot password: always shows "Check your inbox"
+- Personalisation: needs a logged-in session (log in first), then any answers
 
 Point at the real API by setting `BACKEND_API_URL` (e.g. the Render URL) in `.env.local`. The API docs are at `<BACKEND_API_URL>/scalar`.
 
@@ -52,7 +53,7 @@ Point at the real API by setting `BACKEND_API_URL` (e.g. the Render URL) in `.en
 | 04 to 04d Email verification | `/verify-email` | Done (mock API) |
 | 05 to 05c Login | `/login` | Done (mock API, biometrics hidden) |
 | 06, 06b Forgot password | `/forgot-password` | Done (mock API) |
-| 07 to 10b Personalisation | | To do (waiting on backend endpoints) |
+| 07 to 10b Personalisation | `/personalise` | Done (saves to `/account/onboarding` + `/compliance/country`, needs login) |
 
 ## Backend contract (askvest12/AskVest)
 

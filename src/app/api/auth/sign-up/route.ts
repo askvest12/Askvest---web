@@ -4,18 +4,17 @@ import { mockSignUp } from "@/lib/api/mocks";
 import { toUiError } from "@/lib/api/errors";
 import { errorResponse, guardJson, idempotencyKeyFrom } from "@/lib/api/route-guard";
 
-// POST /api/v1/auth/sign-up { email, password }
+// POST /api/v1/auth/sign-up { email, password, fullName }
 // The backend answers the same way whether or not the email already exists.
-// TODO(backend): send fullName once the API accepts it (Lucky is aligning API and UI).
 export async function POST(request: Request) {
   const input = await guardJson(request, signUpSchema);
   if (!input.ok) return input.response;
-  const { email, password } = input.data;
+  const { email, password, fullName } = input.data;
 
   const result = useMocks
     ? await mockSignUp(email)
     : await backendFetch<null>("/auth/sign-up", {
-        body: { email, password },
+        body: { email, password, fullName },
         idempotencyKey: idempotencyKeyFrom(request),
         clientIp: clientIpFrom(request),
       });

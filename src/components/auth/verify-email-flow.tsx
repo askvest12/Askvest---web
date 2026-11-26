@@ -190,7 +190,8 @@ function Verified() {
           Your account is ready. Next, a few quick questions so AskVest can fit you.
         </p>
       </div>
-      <ButtonLink href="/personalise">Continue</ButtonLink>
+      {/* Verifying doesn't log the user in (no tokens), and onboarding needs a session. */}
+      <ButtonLink href="/login?next=/personalise">Continue</ButtonLink>
     </main>
   );
 }
