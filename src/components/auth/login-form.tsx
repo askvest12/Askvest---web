@@ -11,13 +11,15 @@ import { ErrorBanner } from "@/components/ui/feedback";
 import { LockIcon, MailIcon } from "@/components/ui/icons";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 import { apiPost, ApiError } from "@/lib/api/client";
-import { setPendingEmail } from "@/lib/pending-email";
+import { setDeviceEmail, setPendingEmail } from "@/lib/pending-email";
 import { safeNext } from "@/lib/safe-next";
 
 // 05 · Login, 05b error, 05c loading. "Use biometrics" is hidden until the backend supports passkeys.
 export function LoginForm() {
   const router = useRouter();
-  const next = safeNext(useSearchParams().get("next"));
+  const params = useSearchParams();
+  const next = safeNext(params.get("next"));
+  const justReset = params.get("reset") === "1";
   const {
     register,
     handleSubmit,
@@ -36,8 +38,9 @@ export function LoginForm() {
       apiPost<{ result: "authenticated" | "device_verification_required" }>("/api/auth/login", values),
     onSuccess: (data, values) => {
       if (data.result === "device_verification_required") {
-        // TODO: device code screen (not in Figma yet). Backend has emailed a code.
-        setError("root.server", { message: `New device: we've sent a code to ${values.email} to confirm it's you.` });
+        // Backend emailed a code to confirm this new device.
+        setDeviceEmail(values.email);
+        router.push(`/verify-device${next !== "/home" ? `?next=${next}` : ""}`);
         return;
       }
       router.replace(next);
@@ -64,6 +67,11 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit((v) => login.mutate(v))} noValidate className="mt-6 flex flex-1 flex-col">
       <div className="flex flex-col gap-4">
+        {justReset && !errors.root && (
+          <p role="status" className="rounded-[14px] bg-mint-50 px-4 py-3 text-[13px] font-semibold text-success">
+            Password updated. Log in with your new password.
+          </p>
+        )}
         {badCredentials && <ErrorBanner title="Incorrect email or password.">Please check your details and try again.</ErrorBanner>}
         {errors.root?.server && <ErrorBanner title={errors.root.server.message ?? "Something went wrong."} />}
 

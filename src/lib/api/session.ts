@@ -76,7 +76,12 @@ export async function setDeviceChallenge(challengeId: string) {
 }
 
 export async function getDeviceChallenge() {
-  return (await cookies()).get(CHALLENGE_COOKIE)?.value ?? null;
+  const id = (await cookies()).get(CHALLENGE_COOKIE)?.value ?? null;
+  return id && /^[0-9a-f-]{36}$/i.test(id) ? id : null;
+}
+
+export async function clearDeviceChallenge() {
+  (await cookies()).delete({ name: CHALLENGE_COOKIE, path: "/api" });
 }
 
 /** Short device label for the backend's device list, e.g. "Chrome on Android". */

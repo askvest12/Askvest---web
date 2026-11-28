@@ -37,8 +37,8 @@ Open it at phone width (390px) in dev tools, or on your phone over the local net
 Mock test values (used while `BACKEND_API_URL` is empty):
 - Sign up: any details. `down@askvest.test` shows "couldn't reach AskVest"
 - Verify email: `123456` is correct, anything else is incorrect
-- Log in: password `Askvest2026x`. `unverified@askvest.test` goes to verify email, `newdevice@askvest.test` shows the new-device message
-- Forgot password: always shows "Check your inbox"
+- Log in: password `Askvest2026x`. `unverified@askvest.test` goes to verify email, `newdevice@askvest.test` goes to the device code screen (code `123456`)
+- Forgot password: any email, then reset code `123456`
 - Personalisation: needs a logged-in session (log in first), then any answers
 
 Point at the real API by setting `BACKEND_API_URL` (e.g. the Render URL) in `.env.local`. The API docs are at `<BACKEND_API_URL>/scalar`.
@@ -52,7 +52,7 @@ Point at the real API by setting `BACKEND_API_URL` (e.g. the Render URL) in `.en
 | 03 / 03b Sign up | `/sign-up` | Done (mock API). Google/Apple show "coming soon" |
 | 04 to 04d Email verification | `/verify-email` | Done (mock API) |
 | 05 to 05c Login | `/login` | Done (mock API, biometrics hidden) |
-| 06, 06b Forgot password | `/forgot-password` | Done (mock API) |
+| 06 Forgot password, Enter code, Set new password | `/forgot-password`, `/reset-password` | Done (code based, matches backend) |
 | 07 to 10b Personalisation | `/personalise` | Done (saves to `/account/onboarding` + `/compliance/country`, needs login) |
 
 ## Backend contract (askvest12/AskVest)
@@ -66,8 +66,7 @@ Route handlers in `src/app/api/auth/*` call `/api/v1/auth/*` and unwrap the `{ s
 ## Open items with backend and design
 
 - Password checklist follows the backend (10+ chars, a letter, a number). Figma still says 8+, upper & lowercase
-- Forgot password is code based on the backend (`/auth/reset-password`), Figma shows a link
-- New-device login needs a code screen (`/auth/verify-device`), not in Figma
+- Device code screen (`/verify-device`) reuses the code layout until Figma has one
 - Rate limiting is per client IP: behind our Next.js server, the backend must trust our `X-Forwarded-For`
 - Google/Apple sign in is not on the backend yet
 - Personalisation answers need an endpoint

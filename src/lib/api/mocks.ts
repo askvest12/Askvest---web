@@ -11,6 +11,8 @@ import type { ApiResult, AuthenticatedPayloadLike } from "./mock-types";
 //            newdevice@askvest.test  -> device verification required (screen not designed yet)
 //            anything else -> auth.invalid_credentials
 // Forgot:    always succeeds (the real API never reveals whether an email exists)
+// Reset:     code 123456 -> success, anything else -> auth.invalid_code
+// Device:    code 123456 -> signed in, anything else -> auth.invalid_code
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const fail = (status: number, code: string, message: string) => ({ ok: false as const, status, error: { code, message } });
@@ -52,4 +54,21 @@ export async function mockLogin(email: string, password: string): Promise<ApiRes
 export async function mockForgotPassword(): Promise<ApiResult<null>> {
   await wait(600);
   return { ok: true, status: 200, data: null };
+}
+
+export async function mockResetPassword(code: string): Promise<ApiResult<null>> {
+  await wait(700);
+  if (code !== "123456") return fail(400, "auth.invalid_code", "The request is not valid.");
+  return { ok: true, status: 200, data: null };
+}
+
+export async function mockVerifyDevice(code: string): Promise<ApiResult<AuthenticatedPayloadLike>> {
+  await wait(700);
+  if (code !== "123456") return fail(400, "auth.invalid_code", "The request is not valid.");
+  const exp = (s: number) => new Date(Date.now() + s * 1000).toISOString();
+  return {
+    ok: true,
+    status: 200,
+    data: { result: "authenticated", accessToken: "mock-access", refreshToken: "mock-refresh", accessTokenExpiresAt: exp(900), refreshIdleExpiresAt: exp(2_592_000), sessionId: "mock-session" },
+  };
 }
