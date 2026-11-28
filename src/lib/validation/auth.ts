@@ -76,3 +76,27 @@ export const onboardingSchema = z
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), "Nothing to save");
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
+
+// Reset password (POST /api/v1/auth/reset-password { email, code, password })
+export const resetPasswordSchema = z
+  .object({
+    email,
+    code: z.string().regex(new RegExp(`^\\d{${OTP_LENGTH}}$`), "Enter the 6-digit code"),
+    password: z
+      .string()
+      .max(128, "Password is too long")
+      .refine((v) => passwordRules.every((r) => r.test(v)), "Password doesn't meet all the rules"),
+    confirmPassword: z.string(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.password !== v.confirmPassword) ctx.addIssue({ code: "custom", path: ["confirmPassword"], message: "Passwords don't match" });
+    if (containsEmailName(v.password, v.email)) ctx.addIssue({ code: "custom", path: ["password"], message: "Password can't contain your email name" });
+  });
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+// New-device check after login (POST /api/v1/auth/verify-device { challengeId, code }).
+// The challengeId stays in an httpOnly cookie, so the browser only sends the code.
+export const verifyDeviceSchema = z.object({
+  code: z.string().regex(new RegExp(`^\\d{${OTP_LENGTH}}$`), "Enter the 6-digit code"),
+});
+export type VerifyDeviceInput = z.infer<typeof verifyDeviceSchema>;
